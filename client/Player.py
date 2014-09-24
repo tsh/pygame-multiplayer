@@ -1,3 +1,5 @@
+import pygame
+
 class Player(object):
     STATE_IDLE  = 1
     STATE_MOVE  = 2
@@ -17,3 +19,6 @@ class Player(object):
         self.pos_y = 0
         self.direction = 0  # Angle facing
         self.speed = 0.0  # Movement speed
+
+        #TODO: set correct path
+        self.sprite = pygame.image.load(r"C:\Users\TSH\PycharmProjects\pyGameMMO\client\pyro.png")
