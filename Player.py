@@ -11,7 +11,7 @@ class Player(object):
 
         self.state = None  # last known state
         self.time = None  # Time of last update
-        self.latency = None  # Half of roundtrip latency in ms
+        self.latency = 0  # Half of roundtrip latency in ms
 
         self.pos_x = 0
         self.pos_y = 0
