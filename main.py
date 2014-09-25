@@ -1,4 +1,5 @@
 import sys
+import websocket
 import pygame
 
 from client.Player import Player
@@ -10,6 +11,9 @@ surface = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("hello")
 
 player = Player()
+ws = websocket.create_connection("ws://127.0.0.1:8000/ws")
+ws.send("test")
+print ws.recv()
 
 RUNNING = True
 while RUNNING:
@@ -25,5 +29,5 @@ while RUNNING:
 
     # Render
     surface.fill(background_color)
-    surface.blit(player.sprite, (0,0))
+    surface.blit(player.sprite, (player.pos_x,player.pos_y))
     pygame.display.flip()

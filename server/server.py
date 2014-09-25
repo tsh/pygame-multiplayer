@@ -11,7 +11,7 @@ class WSHandler(websocket.WebSocketHandler):
         WSHandler.users.append(self)
 
     def on_message(self, message):
-        self.write_message(message)
+        self.write_message("You say: " + message)
 
     def on_close(self):
         WSHandler.users.remove(self)
@@ -29,4 +29,6 @@ if __name__ == "__main__":
     app = Application()
     http_server = tornado.httpserver.HTTPServer(app)
     http_server.listen(8000)
-    tornado.ioloop.IOLoop.instance().start()
+    ioloop = tornado.ioloop.IOLoop.instance()
+    tornado.autoreload.start(ioloop)
+    ioloop.start()
