@@ -1,7 +1,7 @@
 import pygame
 
 
-class Player(object):
+class BasePlayer(object):
     STATE_IDLE  = 1
     STATE_MOVE  = 2
     STATE_SWING = 3

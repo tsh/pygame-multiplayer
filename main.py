@@ -2,7 +2,7 @@ import sys
 import websocket
 import pygame
 
-from client.Player import Player
+from shared_objects.base_player import BasePlayer
 
 background_color = (255, 255, 255)
 WIDTH = 800
@@ -10,7 +10,7 @@ HEIGHT = 600
 surface = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("hello")
 
-player = Player()
+player = BasePlayer()
 ws = websocket.create_connection("ws://127.0.0.1:8000/ws")
 ws.send("test")
 print ws.recv()
