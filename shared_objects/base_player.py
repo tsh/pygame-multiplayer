@@ -1,4 +1,7 @@
+import json
+
 import pygame
+
 
 
 class BasePlayer(object):
@@ -7,10 +10,10 @@ class BasePlayer(object):
     STATE_SWING = 3
     STATE_HURT  = 4
 
-    def __init__(self):
+    def __init__(self, ws_connection):
         self.connected = False
         self.name = "Test_1"
-        self.connection_uid = None
+        self.ws_connection = ws_connection
 
         self.state = None  # last known state
         self.time = None  # Time of last update
@@ -32,6 +35,5 @@ class BasePlayer(object):
         """
         if self.previous_action == event.type:
             return
-        if event.type == pygame.K_LEFT:
-            self.previous_action = event.type
-            #TODO: send to server
+        self.previous_action = event.type
+        self.ws_connection.send(json.dumps({"mtype":"move", "direction": self.direction}))

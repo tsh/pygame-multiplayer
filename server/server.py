@@ -11,6 +11,7 @@ class WSHandler(websocket.WebSocketHandler):
         WSHandler.users.append(self)
 
     def on_message(self, message):
+        print message
         self.write_message("You say: " + message)
 
     def on_close(self):

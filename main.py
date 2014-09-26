@@ -10,8 +10,8 @@ HEIGHT = 600
 surface = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("hello")
 
-player = BasePlayer()
 ws = websocket.create_connection("ws://127.0.0.1:8000/ws")
+player = BasePlayer(ws)
 ws.send("test")
 print ws.recv()
 
@@ -25,7 +25,7 @@ while RUNNING:
     # Keys
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
-        pass
+        player.update(event)
 
     # Render
     surface.fill(background_color)
