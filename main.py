@@ -10,6 +10,9 @@ HEIGHT = 600
 surface = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("hello")
 
+clock = pygame.time.Clock()
+FPS = 80
+
 ws = websocket.create_connection("ws://127.0.0.1:8000/ws")
 player = BasePlayer(ws)
 ws.send("test")
@@ -17,6 +20,8 @@ print ws.recv()
 
 RUNNING = True
 while RUNNING:
+    clock.tick(FPS)
+
     # Events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
