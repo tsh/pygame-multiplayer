@@ -1,8 +1,16 @@
 import sys
-import websocket
+
 import pygame
+from ws4py.client.threadedclient import WebSocketClient
 
 from shared_objects.base_player import BasePlayer
+
+class WSClass(WebSocketClient):
+    def opened(self):
+        self.send("ws4py")
+
+    def received_message(self, m):
+        print m
 
 background_color = (255, 255, 255)
 WIDTH = 800
@@ -13,10 +21,10 @@ pygame.display.set_caption("hello")
 clock = pygame.time.Clock()
 FPS = 80
 
-ws = websocket.create_connection("ws://127.0.0.1:8000/ws")
+ws = WSClass("ws://127.0.0.1:8000/ws")
+ws.connect()
 player = BasePlayer(ws)
 ws.send("test")
-print ws.recv()
 
 RUNNING = True
 while RUNNING:

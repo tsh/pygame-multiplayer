@@ -25,7 +25,7 @@ class BasePlayer(object):
         self.speed = 0.0  # Movement speed
 
         #TODO: set correct path
-        self.sprite = pygame.image.load(r"C:\Users\TSH\PycharmProjects\pyGameMMO\client\pyro.png").convert_alpha()
+        self.sprite = pygame.image.load(r"C:\Users\TSH\PycharmProjects\pyGameMultiplayer\client\pyro.png").convert_alpha()
 
         self.previous_action = None
 
