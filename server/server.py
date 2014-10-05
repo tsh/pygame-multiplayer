@@ -1,3 +1,6 @@
+import json
+import math
+
 import tornado.web
 import tornado.httpserver
 import tornado.ioloop
@@ -6,13 +9,22 @@ from tornado import websocket
 
 class WSHandler(websocket.WebSocketHandler):
     users = []
+    x = 0
+    y = 0
+    speed = 5.0
+    direction = 0
 
     def open(self):
         WSHandler.users.append(self)
 
     def on_message(self, message):
-        print message
-        self.write_message("You say: " + message)
+        m = json.loads(message)
+        if m['mtype'] == 'move':
+            if m['direction'] == "LEFT":
+                WSHandler.x -= WSHandler.speed
+            elif m['direction'] == "RIGHT":
+                WSHandler.x += WSHandler.speed
+            self.write_message(json.dumps({'mtype':'move', 'x':WSHandler.x, 'y':WSHandler.y}))
 
     def on_close(self):
         WSHandler.users.remove(self)

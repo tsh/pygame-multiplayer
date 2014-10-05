@@ -1,4 +1,5 @@
 import sys
+import json
 
 import pygame
 from ws4py.client.threadedclient import WebSocketClient
@@ -7,10 +8,14 @@ from shared_objects.base_player import BasePlayer
 
 class WSClass(WebSocketClient):
     def opened(self):
-        self.send("ws4py")
+        pass
 
     def received_message(self, m):
-        print m
+        message = json.loads(str(m))
+        print 'after parse: ', message
+        if message['mtype'] == 'move':
+            player.pos_x = message['x']
+            player.pos_y = message['y']
 
 background_color = (255, 255, 255)
 WIDTH = 800
@@ -24,7 +29,7 @@ FPS = 80
 ws = WSClass("ws://127.0.0.1:8000/ws")
 ws.connect()
 player = BasePlayer(ws)
-ws.send("test")
+ws.send(json.dumps({'mtype':'test'}))
 
 RUNNING = True
 while RUNNING:
@@ -36,9 +41,8 @@ while RUNNING:
             sys.exit()
 
     # Keys
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-        player.update(event)
+    if event.type == pygame.KEYDOWN:
+        player.update_movement(event)
 
     # Render
     surface.fill(background_color)

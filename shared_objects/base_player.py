@@ -1,4 +1,5 @@
 import json
+import math
 
 import pygame
 
@@ -29,11 +30,13 @@ class BasePlayer(object):
 
         self.previous_action = None
 
-    def update(self, event):
+    def update_movement(self, event):
         """
         :event: pygame event
         """
-        if self.previous_action == event.type:
-            return
-        self.previous_action = event.type
-        self.ws_connection.send(json.dumps({"mtype":"move", "direction": self.direction}))
+        if event.key == pygame.K_LEFT:
+            self.ws_connection.send(json.dumps({"mtype":"move", "direction": "LEFT"}))
+
+        if event.key == pygame.K_RIGHT:
+            self.ws_connection.send(json.dumps({"mtype":"move", "direction": "RIGHT"}))
+
