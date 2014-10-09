@@ -32,20 +32,23 @@ class Player(object):
 
 
 class App(object):
-    @classmethod
-    def frame(cls):
-        print len(WSConnectionHandler.players)
-        tornado.ioloop.IOLoop.instance().add_timeout(datetime.timedelta(seconds=1), App.frame)
+    def __init__(self):
+        self.upd_player_callback = tornado.ioloop.PeriodicCallback(self.update_players, 33)
+        self.upd_network_callback = tornado.ioloop.PeriodicCallback(self.update_network, 100)
+        self.upd_latency_callback = tornado.ioloop.PeriodicCallback(self.update_latency, 10000)
 
-    @classmethod
-    def update_players(cls):
+    def run(self):
+        self.upd_player_callback.start()
+        self.upd_network_callback.start()
+        self.upd_latency_callback.start()
+
+    def update_players(self):
         pass
 
-    @classmethod
-    def update_network(cls):
+
+    def update_network(self):
         pass
 
-    @classmethod
     def update_latency(cls):
         pass
 
@@ -84,7 +87,8 @@ if __name__ == "__main__":
     app = TornadoWSConnection()
     http_server = tornado.httpserver.HTTPServer(app)
     http_server.listen(8000)
+    app = App()
+    app.run()
     ioloop = tornado.ioloop.IOLoop.instance()
-    ioloop.add_timeout(datetime.timedelta(milliseconds=500), App.frame)
     tornado.autoreload.start(ioloop)
     ioloop.start()
