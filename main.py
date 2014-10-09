@@ -1,5 +1,6 @@
 import sys
 import json
+import pickle
 
 import pygame
 from ws4py.client.threadedclient import WebSocketClient
@@ -11,11 +12,8 @@ class WSClass(WebSocketClient):
         pass
 
     def received_message(self, m):
-        message = json.loads(str(m))
-        print 'after parse: ', message
-        if message['mtype'] == 'move':
-            player.pos_x = message['x']
-            player.pos_y = message['y']
+        message = pickle.loads(str(m))
+        print 'after parse: ', message.data
 
 background_color = (255, 255, 255)
 WIDTH = 800
