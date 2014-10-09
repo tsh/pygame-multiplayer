@@ -1,3 +1,4 @@
+import datetime
 import json
 import math
 
@@ -30,39 +31,60 @@ class Player(object):
         self.speed = 0.0  # Movement speed
 
 
+class App(object):
+    @classmethod
+    def frame(cls):
+        print len(WSConnectionHandler.players)
+        tornado.ioloop.IOLoop.instance().add_timeout(datetime.timedelta(seconds=1), App.frame)
 
-class App(websocket.WebSocketHandler):
+    @classmethod
+    def update_players(cls):
+        pass
+
+    @classmethod
+    def update_network(cls):
+        pass
+
+    @classmethod
+    def update_latency(cls):
+        pass
+
+
+
+class WSConnectionHandler(websocket.WebSocketHandler):
     players = []
 
     def open(self):
         mes = WelcomeMessage().serialize()
         self.write_message(mes)
+        self.players.append(self)
 
     def on_message(self, message):
         m = json.loads(message)
         if m['mtype'] == 'move':
             if m['direction'] == "LEFT":
-                App.x -= App.speed
+                WSConnectionHandler.x -= WSConnectionHandler.speed
             elif m['direction'] == "RIGHT":
-                App.x += App.speed
-            self.write_message(json.dumps({'mtype':'move', 'x':App.x, 'y':App.y}))
+                WSConnectionHandler.x += WSConnectionHandler.speed
+            self.write_message(json.dumps({'mtype':'move', 'x':WSConnectionHandler.x, 'y':WSConnectionHandler.y}))
 
     def on_close(self):
-        App.users.remove(self)
+        WSConnectionHandler.players.remove(self)
 
 
-class Application(tornado.web.Application):
+class TornadoWSConnection(tornado.web.Application):
     def __init__(self):
         handlers = [
-            (r"/ws", App)
+            (r"/ws", WSConnectionHandler)
         ]
         tornado.web.Application.__init__(self, handlers, debug=True)
 
 
 if __name__ == "__main__":
-    app = Application()
+    app = TornadoWSConnection()
     http_server = tornado.httpserver.HTTPServer(app)
     http_server.listen(8000)
     ioloop = tornado.ioloop.IOLoop.instance()
+    ioloop.add_timeout(datetime.timedelta(milliseconds=500), App.frame)
     tornado.autoreload.start(ioloop)
     ioloop.start()
