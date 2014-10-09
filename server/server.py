@@ -47,26 +47,44 @@ class App(object):
 
     def update_players(self):
         for player in WSConnectionHandler.players:
-            time_elapse = ioloop.time() - player.time
+            time_elapsed = ioloop.time() - player.time
 
             if player.state == Player.STATE_MOVE:
-                speed = time_elapse * player.speed
+                speed = time_elapsed * player.speed
                 dx = math.sin(player.direction) * speed
                 dy = math.cos(player.direction) * speed
                 #check collision here if collision(): dx, dy = 0
                 player.pos_x += dx
                 player.pos_y += dy
                 player.time = ioloop.time()
-                print player.pos_y, player.pos_x
+                #TODO: create move message
+                #self.notify_all_players()
 
+            if player.state == Player.STATE_SWING:
+                # swing last 1 sec
+                if time_elapsed > 1000:
+                    player.state = Player.STATE_IDLE
+                    #TODO: create change_status message
+                    #self.notify_all_players()
 
-
+            if player.state == Player.STATE_HURT:
+                if time_elapsed > 1000:
+                    player.state = Player.STATE_HURT
+                    #TODO: create change_status message
+                    #self.notify_all_players()
 
     def update_network(self):
-        pass
+        # Send data to the client in order ty synchronize the gameplay
+        for player in WSConnectionHandler.players:
+            #TODO: send change_status message about himself
+            player.send_message()
 
     def update_latency(cls):
         pass
+
+    def notify_all_players(self, message):
+        for player in WSConnectionHandler.players:
+            player.send_message(message)
 
 
 
