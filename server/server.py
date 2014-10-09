@@ -1,4 +1,3 @@
-import datetime
 import json
 import math
 
@@ -21,14 +20,17 @@ class Player(object):
         self.name = "Test_1"
         self.ws_connection = ws_connection
 
-        self.state = None  # last known state
-        self.time = None  # Time of last update
+        self.state = Player.STATE_IDLE  # last known state
+        self.time = ioloop.time()  # Time of last update
         self.latency = 0  # Half of roundtrip latency in ms
 
         self.pos_x = 0
         self.pos_y = 0
-        self.direction = 0  # Angle facing
-        self.speed = 0.0  # Movement speed
+        self.direction = 0.0  # Angle facing
+        self.speed = 5.0  # Movement speed
+
+    def send_message(self, message):
+        self.ws_connection.write_message(message)
 
 
 class App(object):
@@ -42,8 +44,22 @@ class App(object):
         self.upd_network_callback.start()
         self.upd_latency_callback.start()
 
+
     def update_players(self):
-        pass
+        for player in WSConnectionHandler.players:
+            time_elapse = ioloop.time() - player.time
+
+            if player.state == Player.STATE_MOVE:
+                speed = time_elapse * player.speed
+                dx = math.sin(player.direction) * speed
+                dy = math.cos(player.direction) * speed
+                #check collision here if collision(): dx, dy = 0
+                player.pos_x += dx
+                player.pos_y += dy
+                player.time = ioloop.time()
+                print player.pos_y, player.pos_x
+
+
 
 
     def update_network(self):
@@ -60,7 +76,8 @@ class WSConnectionHandler(websocket.WebSocketHandler):
     def open(self):
         mes = WelcomeMessage().serialize()
         self.write_message(mes)
-        self.players.append(self)
+        player = Player(ws_connection=self)
+        self.players.append(player)
 
     def on_message(self, message):
         m = json.loads(message)
