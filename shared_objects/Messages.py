@@ -1,5 +1,6 @@
 import pickle
 
+
 class Message:
     WELCOME = 0
     CREATE_PLAYER = 1

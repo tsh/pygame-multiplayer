@@ -77,7 +77,8 @@ class App(object):
         # Send data to the client in order ty synchronize the gameplay
         for player in WSConnectionHandler.players:
             #TODO: send change_status message about himself
-            player.send_message()
+            #player.send_message()
+            pass
 
     def update_latency(cls):
         pass
