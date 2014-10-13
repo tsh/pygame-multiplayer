@@ -1,12 +1,14 @@
 import json
 import math
+import time
+import pickle
 
 import tornado.web
 import tornado.httpserver
 import tornado.ioloop
 from tornado import websocket
 
-from shared_objects.messages import WelcomeMessage
+from shared_objects.messages import *
 
 
 class Player(object):
@@ -99,16 +101,23 @@ class WSConnectionHandler(websocket.WebSocketHandler):
         self.players.append(player)
 
     def on_message(self, message):
-        m = json.loads(message)
-        if m['mtype'] == 'move':
-            if m['direction'] == "LEFT":
-                WSConnectionHandler.x -= WSConnectionHandler.speed
-            elif m['direction'] == "RIGHT":
-                WSConnectionHandler.x += WSConnectionHandler.speed
-            self.write_message(json.dumps({'mtype':'move', 'x':WSConnectionHandler.x, 'y':WSConnectionHandler.y}))
+        m = pickle.loads(message)
+        if isinstance(m, StateChangeMessage):
+            dx = math.sin(m.direction) * 2
+            dy = math.cos(m.direction) * 2
+            print dx, dy
+        # m = json.loads(message)
+        # if m['mtype'] == 'move':
+        #     if m['direction'] == "LEFT":
+        #         WSConnectionHandler.x -= WSConnectionHandler.speed
+        #     elif m['direction'] == "RIGHT":
+        #         WSConnectionHandler.x += WSConnectionHandler.speed
+        #     self.write_message(json.dumps({'mtype':'move', 'x':WSConnectionHandler.x, 'y':WSConnectionHandler.y}))
 
     def on_close(self):
-        WSConnectionHandler.players.remove(self)
+        for player in WSConnectionHandler.players:
+            if player.ws_connection == self:
+                WSConnectionHandler.players.remove(player)
 
 
 class TornadoWSConnection(tornado.web.Application):
