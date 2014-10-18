@@ -60,10 +60,12 @@ class Game(object):
         Stage.player.render(self._display_surf)
         pygame.display.flip()
 
-    def _on_event(self, event):
-        if event.type == pygame.QUIT:
-            sys.exit()
+    def _on_event(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
 
+    def _movement(self):
         pressed_keys = pygame.key.get_pressed()
         if pressed_keys[pygame.K_LEFT]:
             Stage.player.direction = +1.0
@@ -86,8 +88,10 @@ class Game(object):
             self.clock.tick(self._FPS)
 
             # Events
-            for event in pygame.event.get():
-                self._on_event(event)
+            self._on_event()
+
+            # Movement
+            self._movement()
 
             # Render
             self._render()

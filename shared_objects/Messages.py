@@ -8,11 +8,19 @@ class Message:
     DESTROY_PLAYER = 3
     STATE_CHANGE = 4
 
+    def serialize(self):
+        return pickle.dumps(self)
+
 
 class WelcomeMessage(Message):
     def __init__(self, data='welcome'):
         self.header = Message.WELCOME
         self.data = data
 
-    def serialize(self):
-        return pickle.dumps(self)
+
+class StateChangeMessage(Message):
+    def __init__(self, direction, x=None, y=None):
+        self.header = Message.STATE_CHANGE
+        self.x = x
+        self.y = y
+        self.direction = direction
