@@ -5,6 +5,8 @@ import pickle
 import pygame
 from ws4py.client.threadedclient import WebSocketClient
 
+from shared_objects.messages import StateChangeMessage
+
 
 class Player(object):
     def __init__(self):
@@ -24,7 +26,17 @@ class WSConnection(WebSocketClient):
 
     def received_message(self, m):
         message = pickle.loads(str(m))
-        print 'after parse: ', message.data
+        if isinstance(message, StateChangeMessage):
+            print 'after parse: ', message.x, message.y, Stage.player.x
+            Stage.player.x = message.x
+            Stage.player.y = message.y
+
+    def closed(self, code, reason=None):
+        print "CLOSED", code
+
+
+class Stage(object):
+    player = None
 
 
 class Game(object):
@@ -39,12 +51,13 @@ class Game(object):
         self.clock = pygame.time.Clock()
         self.connection = WSConnection("ws://127.0.0.1:8000/ws")
         self.connection.connect()
-        self.p = Player()
+        Stage.player = Player()
 
     def _render(self):
+        self._display_surf.fill((1, 2, 2))
         # TODO: call render func on objs, and pass _display_surf
         # _display_surf.blit(self._image_surf, (0, 0))
-        self.p.render(self._display_surf)
+        Stage.player.render(self._display_surf)
         pygame.display.flip()
 
     def _on_event(self, event):
@@ -53,13 +66,18 @@ class Game(object):
 
         pressed_keys = pygame.key.get_pressed()
         if pressed_keys[pygame.K_LEFT]:
-            rotation_direction = +1.0
+            Stage.player.direction = +1.0
+            chng_state = StateChangeMessage(Stage.player.direction)
+            self.connection.send(chng_state.serialize())
         if pressed_keys[pygame.K_RIGHT]:
-            rotation_direction = -1.0
+            Stage.player.direction = -1.0
+            chng_state = StateChangeMessage(Stage.player.direction)
+            self.connection.send(chng_state.serialize())
         if pressed_keys[pygame.K_UP]:
             movement_direction = +1.0
         if pressed_keys[pygame.K_DOWN]:
             movement_direction = -1.0
+        # TODO: send only if changes from prev state
 
 
     def run(self):

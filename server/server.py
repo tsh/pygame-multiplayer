@@ -26,8 +26,8 @@ class Player(object):
         self.time = ioloop.time()  # Time of last update
         self.latency = 0  # Half of roundtrip latency in ms
 
-        self.pos_x = 0
-        self.pos_y = 0
+        self.x = 0
+        self.y = 0
         self.direction = 0.0  # Angle facing
         self.speed = 5.0  # Movement speed
 
@@ -56,8 +56,8 @@ class App(object):
                 dx = math.sin(player.direction) * speed
                 dy = math.cos(player.direction) * speed
                 #check collision here if collision(): dx, dy = 0
-                player.pos_x += dx
-                player.pos_y += dy
+                player.x += dx
+                player.y += dy
                 player.time = ioloop.time()
                 #TODO: create move message
                 #self.notify_all_players()
@@ -103,9 +103,17 @@ class WSConnectionHandler(websocket.WebSocketHandler):
     def on_message(self, message):
         m = pickle.loads(message)
         if isinstance(m, StateChangeMessage):
-            dx = math.sin(m.direction) * 2
-            dy = math.cos(m.direction) * 2
-            print dx, dy
+            player = None
+            for p in WSConnectionHandler.players:
+                if p == self:
+                    player = p
+            if m.direction == -1:
+                p.x += p.speed
+            if m.direction == +1:
+                p.x -= p.speed
+            mes = StateChangeMessage("direction", p.x, p.y)
+            self.write_message(mes.serialize())
+            #self.write(mes.serialize())
         # m = json.loads(message)
         # if m['mtype'] == 'move':
         #     if m['direction'] == "LEFT":
