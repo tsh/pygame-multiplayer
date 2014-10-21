@@ -101,27 +101,33 @@ class WSConnectionHandler(websocket.WebSocketHandler):
         self.players.append(player)
 
     def on_message(self, message):
-        m = pickle.loads(message)
-        if isinstance(m, StateChangeMessage):
-            player = None
+        msg = pickle.loads(message)
+        if isinstance(msg, StateChangeMessage):
             for p in WSConnectionHandler.players:
                 if p == self:
                     player = p
-            if m.direction == -1:
-                p.direction += m.direction
+            if msg.direction == -1:
+                p.direction += msg.direction
                 dx = math.sin(p.direction) * p.speed
                 p.x += dx
-            if m.direction == +1:
-                p.direction += m.direction
+            if msg.direction == +1:
+                p.direction += msg.direction
                 dy = math.sin(p.direction) * p.speed
                 p.y += dy
             mes = StateChangeMessage(p.direction, p.x, p.y)
             self.write_message(mes.serialize())
 
     def on_close(self):
+        p = self.get_player()
+        WSConnectionHandler.players.remove(p)
+
+    def get_player(self):
         for player in WSConnectionHandler.players:
             if player.ws_connection == self:
-                WSConnectionHandler.players.remove(player)
+                return player
+
+    def handle_state_change(self):
+        pass
 
 
 class TornadoWSConnection(tornado.web.Application):
