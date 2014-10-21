@@ -17,6 +17,8 @@ class Player(object):
     STATE_SWING = 3
     STATE_HURT  = 4
 
+    CHANGE_ALLOWED = [Player.STATE_IDLE, Player.STATE_MOVE]
+
     def __init__(self, ws_connection):
         self.connected = False
         self.name = "Test_1"
@@ -29,7 +31,7 @@ class Player(object):
         self.x = 0
         self.y = 0
         self.direction = 0.0  # Angle facing
-        self.speed = 5.0  # Movement speed
+        self.speed = 1.0  # Movement speed
 
     def send_message(self, message):
         self.ws_connection.write_message(message)
@@ -103,31 +105,28 @@ class WSConnectionHandler(websocket.WebSocketHandler):
     def on_message(self, message):
         msg = pickle.loads(message)
         if isinstance(msg, StateChangeMessage):
-            for p in WSConnectionHandler.players:
-                if p == self:
-                    player = p
-            if msg.direction == -1:
-                p.direction += msg.direction
-                dx = math.sin(p.direction) * p.speed
-                p.x += dx
-            if msg.direction == +1:
-                p.direction += msg.direction
-                dy = math.sin(p.direction) * p.speed
-                p.y += dy
-            mes = StateChangeMessage(p.direction, p.x, p.y)
-            self.write_message(mes.serialize())
+            self.handle_state_change(msg)
 
     def on_close(self):
         p = self.get_player()
         WSConnectionHandler.players.remove(p)
 
     def get_player(self):
+        """ Return player obj associated with this connection """
         for player in WSConnectionHandler.players:
             if player.ws_connection == self:
                 return player
 
-    def handle_state_change(self):
-        pass
+    def handle_state_change(self, msg):
+        player = self.get_player()
+        allow_change = True
+        # player.direction = msg.direction
+        # dx = math.cos(math.radians(player.direction)) * player.speed
+        # dy = math.sin(math.radians(player.direction)) * player.speed
+        # player.x += dx
+        # player.y += dy
+        # mes = StateChangeMessage(player.direction, player.x, player.y)
+        # self.write_message(mes.serialize())
 
 
 class TornadoWSConnection(tornado.web.Application):
