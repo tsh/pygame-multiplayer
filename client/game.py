@@ -10,14 +10,30 @@ from shared_objects.messages import StateChangeMessage
 
 class Player(object):
     def __init__(self):
-        self.x = 5.0
-        self.y = 50.0
         self.direction = 0.0
-        self._sprite = pygame.image.load(os.path.join("pyro.png")).convert_alpha()
+        self._original_image = pygame.image.load(os.path.join("pyro.png")).convert_alpha()
+        self._sprite = self._original_image
+        self.rect = self._sprite.get_rect()
+        self.rect.center = (200, 200)
+
+    def turn_left(self):
+        self.direction += 45
+        if self.direction > 360:
+            self.direction = 45
+
+    def turn_right(self):
+        self.direction -= 45
+        if self.direction < 0:
+            self.direction = 315
 
     def render(self, game_surface):
         """game_surface: surface on which draw player sprite"""
-        game_surface.blit(self._sprite, (self.x, self.y))
+        old_center = self.rect.center  # rotation distort original image and its coordinates
+        self._sprite = pygame.transform.rotate(self._original_image, self.direction)  # rotate original to prevent distortion
+        self.rect = self._sprite.get_rect()
+        self.rect.center = old_center  # restore original position
+        # Render
+        game_surface.blit(self._sprite, (self.rect.x, self.rect.y))
 
 
 class WSConnection(WebSocketClient):
@@ -27,9 +43,8 @@ class WSConnection(WebSocketClient):
     def received_message(self, m):
         message = pickle.loads(str(m))
         if isinstance(message, StateChangeMessage):
-            print 'after parse: ', message.x, message.y, Stage.player.x
-            Stage.player.x = message.x
-            Stage.player.y = message.y
+            print 'after parse: ', message.direction, message.x, message.y, Stage.player.rect
+            Stage.player.rect.move_ip(message.x, message.y)
 
     def closed(self, code, reason=None):
         print "CLOSED", code
@@ -44,7 +59,7 @@ class Game(object):
         pygame.init()
         self._WINDOW_WIDTH = 800
         self._WINDOW_HEIGHT = 600
-        self._FPS = 80  # TODO: sync with server update rate
+        self._FPS = 60  # TODO: sync with server update rate
         self._display_surf = pygame.display.set_mode((self._WINDOW_WIDTH, self._WINDOW_HEIGHT), pygame.HWSURFACE)
         pygame.display.set_caption(window_caption)
         self._running = True
@@ -68,11 +83,11 @@ class Game(object):
     def _movement(self):
         pressed_keys = pygame.key.get_pressed()
         if pressed_keys[pygame.K_LEFT]:
-            Stage.player.direction = +1.0
+            Stage.player.turn_left()
             chng_state = StateChangeMessage(Stage.player.direction)
             self.connection.send(chng_state.serialize())
         if pressed_keys[pygame.K_RIGHT]:
-            Stage.player.direction = -1.0
+            Stage.player.turn_right()
             chng_state = StateChangeMessage(Stage.player.direction)
             self.connection.send(chng_state.serialize())
         if pressed_keys[pygame.K_UP]:

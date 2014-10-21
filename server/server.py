@@ -108,19 +108,15 @@ class WSConnectionHandler(websocket.WebSocketHandler):
                 if p == self:
                     player = p
             if m.direction == -1:
-                p.x += p.speed
+                p.direction += m.direction
+                dx = math.sin(p.direction) * p.speed
+                p.x += dx
             if m.direction == +1:
-                p.x -= p.speed
-            mes = StateChangeMessage("direction", p.x, p.y)
+                p.direction += m.direction
+                dy = math.sin(p.direction) * p.speed
+                p.y += dy
+            mes = StateChangeMessage(p.direction, p.x, p.y)
             self.write_message(mes.serialize())
-            #self.write(mes.serialize())
-        # m = json.loads(message)
-        # if m['mtype'] == 'move':
-        #     if m['direction'] == "LEFT":
-        #         WSConnectionHandler.x -= WSConnectionHandler.speed
-        #     elif m['direction'] == "RIGHT":
-        #         WSConnectionHandler.x += WSConnectionHandler.speed
-        #     self.write_message(json.dumps({'mtype':'move', 'x':WSConnectionHandler.x, 'y':WSConnectionHandler.y}))
 
     def on_close(self):
         for player in WSConnectionHandler.players:
