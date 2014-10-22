@@ -17,7 +17,7 @@ class WelcomeMessage(Message):
         self.header = Message.WELCOME
         self.data = data
 
-
+#
 class StateChangeMessage(Message):
     def __init__(self, direction, x=None, y=None):
         self.header = Message.STATE_CHANGE
