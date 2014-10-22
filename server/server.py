@@ -77,6 +77,7 @@ class App(object):
                     #TODO: create change_status message
                     #self.notify_all_players()
 
+
     def update_network(self):
         # Send data to the client in order ty synchronize the gameplay
         for player in WSConnectionHandler.players:
@@ -119,7 +120,8 @@ class WSConnectionHandler(websocket.WebSocketHandler):
 
     def handle_state_change(self, msg):
         player = self.get_player()
-        allow_change = True
+        if msg.header in Player.CHANGE_ALLOWED:
+            player.direction = msg.direction
         # player.direction = msg.direction
         # dx = math.cos(math.radians(player.direction)) * player.speed
         # dy = math.sin(math.radians(player.direction)) * player.speed
