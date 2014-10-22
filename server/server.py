@@ -17,7 +17,7 @@ class Player(object):
     STATE_SWING = 3
     STATE_HURT  = 4
 
-    CHANGE_ALLOWED = [Player.STATE_IDLE, Player.STATE_MOVE]
+    CHANGE_ALLOWED = [STATE_IDLE, STATE_MOVE]
 
     def __init__(self, ws_connection):
         self.connected = False
