@@ -63,7 +63,7 @@ class App(object):
                 player.time = ioloop.time()
                 #TODO: create move message
                 #self.notify_all_players()
-
+            print player.direction
             if player.state == Player.STATE_SWING:
                 # swing last 1 sec
                 if time_elapsed > 1000:
@@ -120,7 +120,7 @@ class WSConnectionHandler(websocket.WebSocketHandler):
 
     def handle_state_change(self, msg):
         player = self.get_player()
-        if msg.header in Player.CHANGE_ALLOWED:
+        if player.state in Player.CHANGE_ALLOWED:
             player.direction = msg.direction
         # player.direction = msg.direction
         # dx = math.cos(math.radians(player.direction)) * player.speed
