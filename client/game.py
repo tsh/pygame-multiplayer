@@ -5,10 +5,11 @@ import pickle
 import pygame
 from ws4py.client.threadedclient import WebSocketClient
 
-from shared_objects.messages import StateChangeMessage
+from shared_objects.messages import *
+from shared_objects.base_player import BasePlayer
 
 
-class Player(object):
+class Player(BasePlayer):
     def __init__(self):
         self.direction = 0.0
         self._original_image = pygame.image.load(os.path.join("pyro.png")).convert_alpha()
@@ -42,8 +43,9 @@ class WSConnection(WebSocketClient):
 
     def received_message(self, m):
         message = pickle.loads(str(m))
-        if isinstance(message, StateChangeMessage):
-            print 'after parse: ', message.direction, message.x, message.y, Stage.player.rect
+        if isinstance(message, PlayerPositionMessage):
+            print 'after parse: ', message.x, message.y
+            Stage.player.direction = message.direction
             Stage.player.rect.move_ip(message.x, message.y)
 
     def closed(self, code, reason=None):
@@ -84,16 +86,18 @@ class Game(object):
         pressed_keys = pygame.key.get_pressed()
         if pressed_keys[pygame.K_LEFT]:
             Stage.player.turn_left()
-            chng_state = StateChangeMessage(Stage.player.direction)
+            chng_state = StateChangeMessage(BasePlayer.STATE_IDLE, Stage.player.direction)
             self.connection.send(chng_state.serialize())
         if pressed_keys[pygame.K_RIGHT]:
             Stage.player.turn_right()
-            chng_state = StateChangeMessage(Stage.player.direction)
+            chng_state = StateChangeMessage(BasePlayer.STATE_IDLE, Stage.player.direction)
             self.connection.send(chng_state.serialize())
         if pressed_keys[pygame.K_UP]:
-            movement_direction = +1.0
+            chng_state = StateChangeMessage(BasePlayer.STATE_MOVE, Stage.player.direction)
+            self.connection.send(chng_state.serialize())
         if pressed_keys[pygame.K_DOWN]:
-            movement_direction = -1.0
+            chng_state = StateChangeMessage(BasePlayer.STATE_MOVE, Stage.player.direction)
+            self.connection.send(chng_state.serialize())
         # TODO: send only if changes from prev state
 
 

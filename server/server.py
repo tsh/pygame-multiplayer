@@ -9,18 +9,11 @@ import tornado.ioloop
 from tornado import websocket
 
 from shared_objects.messages import *
+from shared_objects.base_player import BasePlayer
 
 
-class Player(object):
-    STATE_IDLE  = 1
-    STATE_MOVE  = 2
-    STATE_SWING = 3
-    STATE_HURT  = 4
-
-    CHANGE_ALLOWED = [STATE_IDLE, STATE_MOVE]
-
+class Player(BasePlayer):
     def __init__(self, ws_connection):
-        self.connected = False
         self.name = "Test_1"
         self.ws_connection = ws_connection
 
@@ -31,10 +24,10 @@ class Player(object):
         self.x = 0
         self.y = 0
         self.direction = 0.0  # Angle facing
-        self.speed = 1.0  # Movement speed
+        self.speed = 1.0  # max movement speed
 
     def send_message(self, message):
-        self.ws_connection.write_message(message)
+        self.ws_connection.write_message(message.serialize())
 
 
 class App(object):
@@ -61,9 +54,9 @@ class App(object):
                 player.x += dx
                 player.y += dy
                 player.time = ioloop.time()
-                #TODO: create move message
+                mes = PlayerPositionMessage(player.x, player.y, player.direction)
+                player.send_message(mes)
                 #self.notify_all_players()
-            print player.direction
             if player.state == Player.STATE_SWING:
                 # swing last 1 sec
                 if time_elapsed > 1000:
@@ -121,6 +114,7 @@ class WSConnectionHandler(websocket.WebSocketHandler):
     def handle_state_change(self, msg):
         player = self.get_player()
         if player.state in Player.CHANGE_ALLOWED:
+            player.state = msg.player_state
             player.direction = msg.direction
         # player.direction = msg.direction
         # dx = math.cos(math.radians(player.direction)) * player.speed

@@ -1,5 +1,7 @@
 import pickle
 
+from shared_objects.base_player import BasePlayer
+
 
 class Message:
     WELCOME = 0
@@ -19,8 +21,18 @@ class WelcomeMessage(Message):
 
 
 class StateChangeMessage(Message):
-    def __init__(self, direction, x=None, y=None):
+    def __init__(self, player_state=None, direction=None, x=None, y=None):
         self.header = Message.STATE_CHANGE
+        self.player_state = player_state
+        self.direction = direction
+
+
+class PlayerPositionMessage(Message):
+    def __init__(self, x, y, direction):
         self.x = x
         self.y = y
         self.direction = direction
+
+class PlayerInfo(Message):
+    def __init__(self, rect):
+        self.rect = rect
