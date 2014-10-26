@@ -29,9 +29,8 @@ class StateChangeMessage(Message):
 
 
 class PlayerPositionMessage(Message):
-    def __init__(self, x, y, direction):
-        self.x = x
-        self.y = y
+    def __init__(self, position, direction):
+        self.position = position
         self.direction = direction
 
 class PlayerInfo(Message):

@@ -33,7 +33,7 @@ class App(object):
                 player.calculate_position(time_elapsed)
                 player.time = ioloop.time()
                 print player.position, player.direction
-                mes = PlayerPositionMessage(player.position[0], player.position[1], player.direction)
+                mes = PlayerPositionMessage((player.position.x, player.position.y), player.direction)
                 player.send_message(mes)
                 #self.notify_all_players()
             if player.state == Player.STATE_SWING:

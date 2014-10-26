@@ -29,8 +29,8 @@ class WSConnection(WebSocketClient):
     def received_message(self, m):
         message = pickle.loads(str(m))
         if isinstance(message, PlayerPositionMessage):
-            print 'after parse: ', message.x, message.y
-            Stage.player.position = (message.x, message.y)
+            print 'after parse: ', message.position
+            Stage.player.position = message.position
             Stage.player.direction = message.direction
 
     def closed(self, code, reason=None):
