@@ -29,14 +29,11 @@ class App(object):
             time_elapsed = ioloop.time() - player.time
 
             if player.state == Player.STATE_MOVE:
-                speed = time_elapsed * player.speed
-                dx = math.sin(player.direction) * speed
-                dy = math.cos(player.direction) * speed
                 #check collision here if collision(): dx, dy = 0
-                player.x += dx
-                player.y += dy
+                player.calculate_position(time_elapsed)
                 player.time = ioloop.time()
-                mes = PlayerPositionMessage(player.x, player.y, player.direction)
+                print player.position, player.direction
+                mes = PlayerPositionMessage(player.position[0], player.position[1], player.direction)
                 player.send_message(mes)
                 #self.notify_all_players()
             if player.state == Player.STATE_SWING:
@@ -97,14 +94,8 @@ class WSConnectionHandler(websocket.WebSocketHandler):
         player = self.get_player()
         if player.state in Player.CHANGE_ALLOWED:
             player.state = msg.player_state
-            player.direction = msg.direction
-        # player.direction = msg.direction
-        # dx = math.cos(math.radians(player.direction)) * player.speed
-        # dy = math.sin(math.radians(player.direction)) * player.speed
-        # player.x += dx
-        # player.y += dy
-        # mes = StateChangeMessage(player.direction, player.x, player.y)
-        # self.write_message(mes.serialize())
+            player.rotation_direction = msg.rotation_dir
+            player.movement_direction = msg.movement_dir
 
 
 class TornadoWSConnection(tornado.web.Application):

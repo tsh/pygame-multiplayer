@@ -21,10 +21,11 @@ class WelcomeMessage(Message):
 
 
 class StateChangeMessage(Message):
-    def __init__(self, player_state=None, direction=None, x=None, y=None):
+    def __init__(self, player_state=None, rotation_dir=None, movement_dir=None):
         self.header = Message.STATE_CHANGE
         self.player_state = player_state
-        self.direction = direction
+        self.rotation_dir = rotation_dir
+        self.movement_dir = movement_dir
 
 
 class PlayerPositionMessage(Message):

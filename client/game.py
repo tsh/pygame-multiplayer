@@ -11,30 +11,15 @@ from shared_objects.base_player import BasePlayer
 
 class Player(BasePlayer):
     def __init__(self):
-        self.direction = 0.0
+        self.direction = 0
         self._original_image = pygame.image.load(os.path.join("pyro.png")).convert_alpha()
-        self._sprite = self._original_image
-        self.rect = self._sprite.get_rect()
-        self.rect.center = (200, 200)
-
-    def turn_left(self):
-        self.direction += 45
-        if self.direction > 360:
-            self.direction = 45
-
-    def turn_right(self):
-        self.direction -= 45
-        if self.direction < 0:
-            self.direction = 315
+        self.position = (200, 150)
 
     def render(self, game_surface):
-        """game_surface: surface on which draw player sprite"""
-        old_center = self.rect.center  # rotation distort original image and its coordinates
-        self._sprite = pygame.transform.rotate(self._original_image, self.direction)  # rotate original to prevent distortion
-        self.rect = self._sprite.get_rect()
-        self.rect.center = old_center  # restore original position
-        # Render
-        game_surface.blit(self._sprite, (self.rect.x, self.rect.y))
+        rotated_sprite = pygame.transform.rotate(self._original_image, self.direction)
+        w, h = rotated_sprite.get_size()
+        sprite_draw_pos = (self.position[0]-w/2, self.position[1]-h/2)
+        game_surface.blit(rotated_sprite, sprite_draw_pos)
 
 
 class WSConnection(WebSocketClient):
@@ -45,8 +30,8 @@ class WSConnection(WebSocketClient):
         message = pickle.loads(str(m))
         if isinstance(message, PlayerPositionMessage):
             print 'after parse: ', message.x, message.y
+            Stage.player.position = (message.x, message.y)
             Stage.player.direction = message.direction
-            Stage.player.rect.move_ip(message.x, message.y)
 
     def closed(self, code, reason=None):
         print "CLOSED", code
@@ -84,21 +69,24 @@ class Game(object):
 
     def _movement(self):
         pressed_keys = pygame.key.get_pressed()
+        rotation_direction = 0
+        movement_direction = 0
+
         if pressed_keys[pygame.K_LEFT]:
-            Stage.player.turn_left()
-            chng_state = StateChangeMessage(BasePlayer.STATE_IDLE, Stage.player.direction)
-            self.connection.send(chng_state.serialize())
+            rotation_direction += 1
+
         if pressed_keys[pygame.K_RIGHT]:
-            Stage.player.turn_right()
-            chng_state = StateChangeMessage(BasePlayer.STATE_IDLE, Stage.player.direction)
-            self.connection.send(chng_state.serialize())
+            rotation_direction -= 1
+
         if pressed_keys[pygame.K_UP]:
-            chng_state = StateChangeMessage(BasePlayer.STATE_MOVE, Stage.player.direction)
-            self.connection.send(chng_state.serialize())
+            movement_direction -= 1
+
         if pressed_keys[pygame.K_DOWN]:
-            chng_state = StateChangeMessage(BasePlayer.STATE_MOVE, Stage.player.direction)
-            self.connection.send(chng_state.serialize())
+            movement_direction += 1
+
         # TODO: send only if changes from prev state
+        chng_state = StateChangeMessage(BasePlayer.STATE_MOVE, rotation_direction, movement_direction)
+        self.connection.send(chng_state.serialize())
 
 
     def run(self):
