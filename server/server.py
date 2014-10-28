@@ -69,8 +69,10 @@ class WSConnectionHandler(websocket.WebSocketHandler):
     def open(self):
         player = Player(ws_connection=self, uuid=uuid.getnode())
         mes = NewPlayerConnected(player)
-        self.notify_all_players(mes)
         self.players.append(player)
+        self.notify_players_except_self(mes)
+        #player_message = ListOfConnectedPlayers()
+
 
 
     def on_message(self, message):
@@ -90,9 +92,14 @@ class WSConnectionHandler(websocket.WebSocketHandler):
             if player.ws_connection == self:
                 return player
 
-    @classmethod
-    def notify_all_players(cls, message):
-        for player in cls.players:
+    def notify_players_except_self(self, message):
+        for player in self.players:
+            if player.ws_connection == self:
+                continue
+            player.send_message(message)
+
+    def notify_all_players(self, message):
+        for player in self.players:
             player.send_message(message)
 
     # --- Handlers ----

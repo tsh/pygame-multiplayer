@@ -41,7 +41,7 @@ class WSConnection(WebSocketClient):
             player.uuid = message.uuid
             player.position = message.position
             player.direction = message.direction
-            Stage.players.append(player)
+            Stage.players[player.uuid] = player
             print Stage.players
 
     def closed(self, code, reason=None):
@@ -51,7 +51,7 @@ class WSConnection(WebSocketClient):
 class Stage(object):
     connection = None
     main_player = None
-    players = []
+    players = {}
 
     @classmethod
     def send_message(cls, message):
@@ -76,7 +76,9 @@ class Game(GameConfig):
         self._display_surf.fill((1, 2, 2))
         # _display_surf.blit(self._image_surf, (0, 0))
         Stage.main_player.render(self._display_surf)
-        # TODO: display all players
+        for player in Stage.players.values():
+            player.render(self._display_surf)
+
         pygame.display.flip()
 
     def _on_event(self):

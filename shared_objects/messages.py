@@ -41,3 +41,8 @@ class NewPlayerConnected(Message):
         self.uuid = player.uuid
         self.position = (player.position.x, player.position.y)
         self.direction = player.direction
+
+
+class ListOfConnectedPlayers(Message):
+    def __init__(self):
+        self.players = []
