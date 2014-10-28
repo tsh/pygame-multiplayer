@@ -26,7 +26,7 @@ class Player(BasePlayer):
 
 class WSConnection(WebSocketClient):
     def opened(self):
-        pi = PlayerInfo(name=GameConfig.player_default_name)
+        pi = PlayerSettings(name=GameConfig.player_default_name)
         Stage.send_message(pi.serialize())
 
     def received_message(self, m):

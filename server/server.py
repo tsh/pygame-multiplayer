@@ -70,8 +70,6 @@ class WSConnectionHandler(websocket.WebSocketHandler):
     players = []
 
     def open(self):
-        mes = WelcomeMessage().serialize()
-        self.write_message(mes)
         player = Player(ws_connection=self)
         self.players.append(player)
         #TODO: notify all about connected main_player
@@ -80,7 +78,7 @@ class WSConnectionHandler(websocket.WebSocketHandler):
         msg = pickle.loads(message)
         if isinstance(msg, StateChangeMessage):
             self.handle_state_change(msg)
-        if isinstance(msg, PlayerInfo):
+        if isinstance(msg, PlayerSettings):
             self.handle_player_info(msg)
 
     def on_close(self):

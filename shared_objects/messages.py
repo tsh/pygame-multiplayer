@@ -14,12 +14,6 @@ class Message:
         return pickle.dumps(self)
 
 
-class WelcomeMessage(Message):
-    def __init__(self, data='welcome'):
-        self.header = Message.WELCOME
-        self.data = data
-
-
 class StateChangeMessage(Message):
     def __init__(self, player_state=None, rotation_dir=None, movement_dir=None):
         self.header = Message.STATE_CHANGE
@@ -34,7 +28,7 @@ class PlayerPositionMessage(Message):
         self.direction = direction
 
 
-class PlayerInfo(Message):
+class PlayerSettings(Message):
     def __init__(self, name=BasePlayer.DEFAULT_NAME, game_class=None, rect=None):
         self.name = name
         self.game_class = game_class
