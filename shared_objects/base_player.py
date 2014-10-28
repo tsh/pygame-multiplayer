@@ -13,3 +13,5 @@ class BasePlayer(object):
 
     CHANGE_ALLOWED = [STATE_IDLE, STATE_MOVE]
 
+    DEFAULT_NAME = "Player"
+

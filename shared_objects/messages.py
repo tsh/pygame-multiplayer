@@ -33,6 +33,9 @@ class PlayerPositionMessage(Message):
         self.position = position
         self.direction = direction
 
+
 class PlayerInfo(Message):
-    def __init__(self, rect):
+    def __init__(self, name=BasePlayer.DEFAULT_NAME, game_class=None, rect=None):
+        self.name = name
+        self.game_class = game_class
         self.rect = rect

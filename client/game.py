@@ -5,12 +5,14 @@ import pickle
 import pygame
 from ws4py.client.threadedclient import WebSocketClient
 
+from game_config import GameConfig
 from shared_objects.messages import *
 from shared_objects.base_player import BasePlayer
 
 
 class Player(BasePlayer):
     def __init__(self):
+        self.name = None
         self.direction = 0
         self._original_image = pygame.image.load(os.path.join("pyro.png")).convert_alpha()
         self.position = (200, 150)
@@ -24,24 +26,29 @@ class Player(BasePlayer):
 
 class WSConnection(WebSocketClient):
     def opened(self):
-        pass
+        pi = PlayerInfo(name=GameConfig.player_default_name)
+        Stage.send_message(pi.serialize())
 
     def received_message(self, m):
         message = pickle.loads(str(m))
         if isinstance(message, PlayerPositionMessage):
-            print 'after parse: ', message.position
-            Stage.player.position = message.position
-            Stage.player.direction = message.direction
+            Stage.main_player.position = message.position
+            Stage.main_player.direction = message.direction
 
     def closed(self, code, reason=None):
         print "CLOSED", code
 
 
 class Stage(object):
-    player = None
+    connection = None
+    main_player = None
+    players = []
 
+    @classmethod
+    def send_message(cls, message):
+        cls.connection.send(message)
 
-class Game(object):
+class Game(GameConfig):
     def __init__(self, window_caption="this is a game"):
         pygame.init()
         self._WINDOW_WIDTH = 800
@@ -51,15 +58,16 @@ class Game(object):
         pygame.display.set_caption(window_caption)
         self._running = True
         self.clock = pygame.time.Clock()
-        self.connection = WSConnection("ws://127.0.0.1:8000/ws")
-        self.connection.connect()
-        Stage.player = Player()
+        Stage.connection = WSConnection("ws://127.0.0.1:8000/ws")
+        Stage.connection.connect()
+        Stage.main_player = Player()
+
 
     def _render(self):
         self._display_surf.fill((1, 2, 2))
-        # TODO: call render func on objs, and pass _display_surf
         # _display_surf.blit(self._image_surf, (0, 0))
-        Stage.player.render(self._display_surf)
+        Stage.main_player.render(self._display_surf)
+        # TODO: display all players
         pygame.display.flip()
 
     def _on_event(self):
@@ -86,7 +94,7 @@ class Game(object):
 
         # TODO: send only if changes from prev state
         chng_state = StateChangeMessage(BasePlayer.STATE_MOVE, rotation_direction, movement_direction)
-        self.connection.send(chng_state.serialize())
+        Stage.send_message(chng_state.serialize())
 
 
     def run(self):

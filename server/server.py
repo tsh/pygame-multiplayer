@@ -2,6 +2,7 @@ import json
 import math
 import time
 import pickle
+import uuid
 
 import tornado.web
 import tornado.httpserver
@@ -32,7 +33,6 @@ class App(object):
                 #check collision here if collision(): dx, dy = 0
                 player.calculate_position(time_elapsed)
                 player.time = ioloop.time()
-                print player.position, player.direction
                 mes = PlayerPositionMessage((player.position.x, player.position.y), player.direction)
                 player.send_message(mes)
                 #self.notify_all_players()
@@ -54,7 +54,7 @@ class App(object):
         # Send data to the client in order ty synchronize the gameplay
         for player in WSConnectionHandler.players:
             #TODO: send change_status message about himself
-            #player.send_message()
+            #main_player.send_message()
             pass
 
     def update_latency(cls):
@@ -74,28 +74,37 @@ class WSConnectionHandler(websocket.WebSocketHandler):
         self.write_message(mes)
         player = Player(ws_connection=self)
         self.players.append(player)
+        #TODO: notify all about connected main_player
 
     def on_message(self, message):
         msg = pickle.loads(message)
         if isinstance(msg, StateChangeMessage):
             self.handle_state_change(msg)
+        if isinstance(msg, PlayerInfo):
+            self.handle_player_info(msg)
 
     def on_close(self):
         p = self.get_player()
         WSConnectionHandler.players.remove(p)
 
     def get_player(self):
-        """ Return player obj associated with this connection """
+        """ Return main_player obj associated with this connection """
         for player in WSConnectionHandler.players:
             if player.ws_connection == self:
                 return player
 
+    # --- Handlers ----
     def handle_state_change(self, msg):
         player = self.get_player()
         if player.state in Player.CHANGE_ALLOWED:
             player.state = msg.player_state
             player.rotation_direction = msg.rotation_dir
             player.movement_direction = msg.movement_dir
+
+    def handle_player_info(self, msg):
+        player = self.get_player()
+        if hasattr(msg, 'name'):
+            player.name = msg.name
 
 
 class TornadoWSConnection(tornado.web.Application):
