@@ -13,6 +13,7 @@ from shared_objects.base_player import BasePlayer
 class Player(BasePlayer):
     def __init__(self):
         self.name = None
+        self.uuid = None
         self.direction = 0
         self._original_image = pygame.image.load(os.path.join("pyro.png")).convert_alpha()
         self.position = (200, 150)
@@ -34,6 +35,14 @@ class WSConnection(WebSocketClient):
         if isinstance(message, PlayerPositionMessage):
             Stage.main_player.position = message.position
             Stage.main_player.direction = message.direction
+        if isinstance(message, NewPlayerConnected):
+            player = Player()
+            player.name = message.name
+            player.uuid = message.uuid
+            player.position = message.position
+            player.direction = message.direction
+            Stage.players.append(player)
+            print Stage.players
 
     def closed(self, code, reason=None):
         print "CLOSED", code

@@ -9,9 +9,10 @@ ioloop = tornado.ioloop.IOLoop.instance()
 
 
 class Player(BasePlayer):
-    def __init__(self, ws_connection):
+    def __init__(self, ws_connection, uuid):
         self.name = "Test_1"
         self.ws_connection = ws_connection
+        self.uuid = uuid
 
         self.state = Player.STATE_IDLE  # last known state
         self.time = ioloop.time()  # Time of last update

@@ -33,3 +33,11 @@ class PlayerSettings(Message):
         self.name = name
         self.game_class = game_class
         self.rect = rect
+
+
+class NewPlayerConnected(Message):
+    def __init__(self, player):
+        self.name = player.name
+        self.uuid = player.uuid
+        self.position = (player.position.x, player.position.y)
+        self.direction = player.direction

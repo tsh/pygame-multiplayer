@@ -12,7 +12,6 @@ from tornado import websocket
 from shared_objects.messages import *
 from player import Player
 
-
 class App(object):
     def __init__(self):
         self.upd_player_callback = tornado.ioloop.PeriodicCallback(self.update_players, 33)
@@ -64,15 +63,15 @@ class App(object):
         for player in WSConnectionHandler.players:
             player.send_message(message)
 
-
-
 class WSConnectionHandler(websocket.WebSocketHandler):
     players = []
 
     def open(self):
-        player = Player(ws_connection=self)
+        player = Player(ws_connection=self, uuid=uuid.getnode())
+        mes = NewPlayerConnected(player)
+        self.notify_all_players(mes)
         self.players.append(player)
-        #TODO: notify all about connected main_player
+
 
     def on_message(self, message):
         msg = pickle.loads(message)
@@ -90,6 +89,11 @@ class WSConnectionHandler(websocket.WebSocketHandler):
         for player in WSConnectionHandler.players:
             if player.ws_connection == self:
                 return player
+
+    @classmethod
+    def notify_all_players(cls, message):
+        for player in cls.players:
+            player.send_message(message)
 
     # --- Handlers ----
     def handle_state_change(self, msg):
