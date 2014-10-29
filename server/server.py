@@ -87,6 +87,8 @@ class WSConnectionHandler(websocket.WebSocketHandler):
     def on_close(self):
         p = self.get_player()
         WSConnectionHandler.players.remove(p)
+        m = PlayerDisconnected(p.uuid)
+        self.notify_all_players(m)
 
     def get_player(self):
         """ Return main_player obj associated with this connection """

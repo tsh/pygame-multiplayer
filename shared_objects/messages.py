@@ -55,3 +55,7 @@ class PlayerMoved(Message):
         self.uuid = uuid_
         self.position = position
         self.direction = direction
+
+class PlayerDisconnected(Message):
+    def __init__(self, uuid_):
+        self.uuid = uuid_

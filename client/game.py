@@ -63,7 +63,11 @@ class WSConnection(WebSocketClient):
             except KeyError:
                 return
             player.update_position_f_message(message)
-
+        if isinstance(message, PlayerDisconnected):
+            try:
+                del Stage.players[message.uuid]
+            except KeyError:
+                return
 
     def closed(self, code, reason=None):
         print "CLOSED", code
@@ -76,6 +80,7 @@ class Stage(object):
     @classmethod
     def send_message(cls, message):
         cls.connection.send(message.serialize())
+
 
 class Game(GameConfig):
     def __init__(self, window_caption="this is a game"):
