@@ -34,7 +34,8 @@ class App(object):
                 player.time = ioloop.time()
                 mes = PlayerPositionMessage((player.position.x, player.position.y), player.direction)
                 player.send_message(mes)
-                #self.notify_all_players()
+                pmvd = PlayerMoved(player.uuid, (player.position.x, player.position.y), player.direction)
+                self.notify_all_players(pmvd)
             if player.state == Player.STATE_SWING:
                 # swing last 1 sec
                 if time_elapsed > 1000:
@@ -67,12 +68,13 @@ class WSConnectionHandler(websocket.WebSocketHandler):
     players = []
 
     def open(self):
-        player = Player(ws_connection=self, uuid=uuid.getnode())
+        player = Player(ws_connection=self, uuid=uuid.uuid4())
         mes = NewPlayerConnected(player)
         self.players.append(player)
         self.notify_players_except_self(mes)
-        #player_message = ListOfConnectedPlayers()
-
+        for p in self.players:
+            p_mes = PlayerInfo(p)
+            player.send_message(p_mes)
 
 
     def on_message(self, message):
@@ -131,5 +133,4 @@ if __name__ == "__main__":
     app = App()
     app.run()
     ioloop = tornado.ioloop.IOLoop.instance()
-    tornado.autoreload.start(ioloop)
     ioloop.start()

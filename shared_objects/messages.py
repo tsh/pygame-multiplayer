@@ -16,7 +16,6 @@ class Message:
 
 class StateChangeMessage(Message):
     def __init__(self, player_state=None, rotation_dir=None, movement_dir=None):
-        self.header = Message.STATE_CHANGE
         self.player_state = player_state
         self.rotation_dir = rotation_dir
         self.movement_dir = movement_dir
@@ -43,6 +42,16 @@ class NewPlayerConnected(Message):
         self.direction = player.direction
 
 
-class ListOfConnectedPlayers(Message):
-    def __init__(self):
-        self.players = []
+class PlayerInfo(Message):
+    def __init__(self, player):
+        self.uuid = player.uuid
+        self.position = (player.position.x, player.position.y)
+        self.direction = player.direction
+        self.name = player.name
+
+
+class PlayerMoved(Message):
+    def __init__(self, uuid_, position, direction):
+        self.uuid = uuid_
+        self.position = position
+        self.direction = direction

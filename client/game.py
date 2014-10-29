@@ -24,6 +24,20 @@ class Player(BasePlayer):
         sprite_draw_pos = (self.position[0]-w/2, self.position[1]-h/2)
         game_surface.blit(rotated_sprite, sprite_draw_pos)
 
+    def init_player_from_mes(self, message):
+        if isinstance(message, PlayerInfo):
+            self.uuid = message.uuid
+            self.position = message.position
+            self.direction = message.direction
+            self.name = message.name
+        else:
+            raise Exception
+
+    def update_position_f_message(self, message):
+        if isinstance(message, PlayerMoved):
+            self.position = message.position
+            self.direction = message.direction
+
 
 class WSConnection(WebSocketClient):
     def opened(self):
@@ -42,7 +56,17 @@ class WSConnection(WebSocketClient):
             player.position = message.position
             player.direction = message.direction
             Stage.players[player.uuid] = player
-            print Stage.players
+        if isinstance(message, PlayerInfo):
+            p = Player()
+            p.init_player_from_mes(message)
+            Stage.players[p.uuid] = p
+        if isinstance(message, PlayerMoved):
+            try:
+                player = Stage.players[message.uuid]
+            except KeyError:
+                return
+            player.update_position_f_message(message)
+
 
     def closed(self, code, reason=None):
         print "CLOSED", code
@@ -74,7 +98,6 @@ class Game(GameConfig):
 
     def _render(self):
         self._display_surf.fill((1, 2, 2))
-        # _display_surf.blit(self._image_surf, (0, 0))
         Stage.main_player.render(self._display_surf)
         for player in Stage.players.values():
             player.render(self._display_surf)
