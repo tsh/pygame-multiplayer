@@ -36,12 +36,12 @@ class App(object):
                 player.send_message(mes)
                 pmvd = PlayerMoved(player.uuid, (player.position.x, player.position.y), player.direction)
                 self.notify_all_players(pmvd)
-            if player.state == Player.STATE_SWING:
+            if player.state == Player.STATE_ATTACK:
                 # swing last 1 sec
                 if time_elapsed > 1000:
                     player.state = Player.STATE_IDLE
-                    #TODO: create change_status message
-                    #self.notify_all_players()
+                    mes = StateChangeMessage(player.state)
+                    player.send_message(mes)
 
             if player.state == Player.STATE_HURT:
                 if time_elapsed > 1000:
@@ -69,6 +69,7 @@ class WSConnectionHandler(websocket.WebSocketHandler):
 
     def open(self):
         player = Player(ws_connection=self, uuid=uuid.uuid4())
+        player.send_message(MyUID(player.uuid))
         mes = NewPlayerConnected(player)
         self.players.append(player)
         self.notify_players_except_self(mes)

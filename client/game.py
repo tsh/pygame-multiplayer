@@ -46,6 +46,8 @@ class WSConnection(WebSocketClient):
 
     def received_message(self, m):
         message = pickle.loads(str(m))
+        if isinstance(message, MyUID):
+            Stage.my_uid = message.uuid
         if isinstance(message, NewPlayerConnected):
             player = Player()
             player.name = message.name
@@ -68,6 +70,8 @@ class WSConnection(WebSocketClient):
                 del Stage.players[message.uuid]
             except KeyError:
                 return
+        if isinstance(message, StateChangeMessage):
+            pass
 
     def closed(self, code, reason=None):
         print "CLOSED", code
@@ -76,11 +80,19 @@ class WSConnection(WebSocketClient):
 class Stage(object):
     connection = None
     players = {}
+    my_uid = None
 
     @classmethod
     def send_message(cls, message):
         cls.connection.send(message.serialize())
 
+    @classmethod
+    def get_main_player(cls):
+        try:
+            player = cls.players[cls.my_uid]
+            return player
+        except KeyError:
+            return None
 
 class Game(GameConfig):
     def __init__(self, window_caption="this is a game"):
@@ -112,6 +124,7 @@ class Game(GameConfig):
         pressed_keys = pygame.key.get_pressed()
         rotation_direction = 0
         movement_direction = 0
+        current_state = BasePlayer.STATE_MOVE
 
         if pressed_keys[pygame.K_LEFT]:
             rotation_direction += 1
@@ -125,8 +138,11 @@ class Game(GameConfig):
         if pressed_keys[pygame.K_DOWN]:
             movement_direction += 1
 
+        if pressed_keys[pygame.K_SPACE]:
+            current_state = BasePlayer.STATE_ATTACK
+
         # TODO: send only if changes from prev state
-        chng_state = StateChangeMessage(BasePlayer.STATE_MOVE, rotation_direction, movement_direction)
+        chng_state = StateChangeMessage(current_state, rotation_direction, movement_direction)
         Stage.send_message(chng_state)
 
 

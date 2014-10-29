@@ -59,3 +59,8 @@ class PlayerMoved(Message):
 class PlayerDisconnected(Message):
     def __init__(self, uuid_):
         self.uuid = uuid_
+
+class MyUID(Message):
+    def __init__(self, uid):
+        self.uuid = uid
+
