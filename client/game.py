@@ -46,9 +46,6 @@ class WSConnection(WebSocketClient):
 
     def received_message(self, m):
         message = pickle.loads(str(m))
-        if isinstance(message, PlayerPositionMessage):
-            Stage.main_player.position = message.position
-            Stage.main_player.direction = message.direction
         if isinstance(message, NewPlayerConnected):
             player = Player()
             player.name = message.name
@@ -74,7 +71,6 @@ class WSConnection(WebSocketClient):
 
 class Stage(object):
     connection = None
-    main_player = None
     players = {}
 
     @classmethod
@@ -93,12 +89,10 @@ class Game(GameConfig):
         self.clock = pygame.time.Clock()
         Stage.connection = WSConnection("ws://127.0.0.1:8000/ws")
         Stage.connection.connect()
-        Stage.main_player = Player()
 
 
     def _render(self):
         self._display_surf.fill((1, 2, 2))
-        Stage.main_player.render(self._display_surf)
         for player in Stage.players.values():
             player.render(self._display_surf)
 
