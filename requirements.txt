@@ -1,0 +1,3 @@
+ws4py==0.3.4
+tornado==3.2
+hg+http://bitbucket.org/pygame/pygame
