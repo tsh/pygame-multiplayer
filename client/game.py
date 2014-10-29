@@ -28,7 +28,7 @@ class Player(BasePlayer):
 class WSConnection(WebSocketClient):
     def opened(self):
         pi = PlayerSettings(name=GameConfig.player_default_name)
-        Stage.send_message(pi.serialize())
+        Stage.send_message(pi)
 
     def received_message(self, m):
         message = pickle.loads(str(m))
@@ -55,7 +55,7 @@ class Stage(object):
 
     @classmethod
     def send_message(cls, message):
-        cls.connection.send(message)
+        cls.connection.send(message.serialize())
 
 class Game(GameConfig):
     def __init__(self, window_caption="this is a game"):
@@ -105,7 +105,7 @@ class Game(GameConfig):
 
         # TODO: send only if changes from prev state
         chng_state = StateChangeMessage(BasePlayer.STATE_MOVE, rotation_direction, movement_direction)
-        Stage.send_message(chng_state.serialize())
+        Stage.send_message(chng_state)
 
 
     def run(self):
