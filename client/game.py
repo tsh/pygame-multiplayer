@@ -15,11 +15,12 @@ class Player(BasePlayer):
         self.name = None
         self.uuid = None
         self.direction = 0
-        self._original_image = pygame.image.load(os.path.join("pyro.png")).convert_alpha()
+        self._original_image = pygame.image.load(os.path.join("..","shared_objects", "assets", "gun_man.png")).convert()
         self.position = (200, 150)
 
     def render(self, game_surface):
         rotated_sprite = pygame.transform.rotate(self._original_image, self.direction)
+        rotated_sprite.set_colorkey((255,255,255))
         w, h = rotated_sprite.get_size()
         sprite_draw_pos = (self.position[0]-w/2, self.position[1]-h/2)
         game_surface.blit(rotated_sprite, sprite_draw_pos)
