@@ -33,7 +33,7 @@ class Player(BasePlayer):
         dx = math.sin(self.direction * math.pi / 180)
         dy = math.cos(self.direction * math.pi / 180)
         move_vector = Vector2(dx, dy)
-        move_vector *= self.movement_direction
+        move_vector *= self.movement_direction *-1  # magic -1 for correct movement
         self.position += move_vector * self.movement_speed * time_passed
 
 
