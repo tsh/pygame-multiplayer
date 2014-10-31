@@ -39,3 +39,6 @@ class Player(BasePlayer):
 
     def send_message(self, message):
         self.ws_connection.write_message(message.serialize())
+
+
+

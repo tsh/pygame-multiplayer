@@ -10,7 +10,7 @@ import tornado.ioloop
 from tornado import websocket
 
 from shared_objects.messages import *
-from player import Player
+from objects import Player
 
 class App(object):
     def __init__(self):
