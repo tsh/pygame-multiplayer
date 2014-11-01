@@ -94,8 +94,6 @@ class WSConnection(WebSocketClient):
             except KeyError:
                 projectile = Projectile.init_from_message(message)
                 Stage.projectiles[message.uuid] = projectile
-        if isinstance(message, PlayerKilled):
-            print message
 
     def closed(self, code, reason=None):
         print "CLOSED", code

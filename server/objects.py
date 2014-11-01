@@ -7,7 +7,6 @@ import tornado
 from shared_objects.base_player import BasePlayer
 from shared_objects.vector2 import Vector2
 from shared_objects.config import GameConfig
-from shared_objects.messages import PlayerKilled
 
 ioloop = tornado.ioloop.IOLoop.instance()
 
@@ -32,8 +31,7 @@ class Player(BasePlayer):
         self.rotation_direction = 0
 
         self.rect = Player.player_rect
-        self.rect.x = self.position.x
-        self.rect.y = self.position.y
+        self.set_hitbox()
 
     def calculate_position(self, time_passed):
         self.direction += self.rotation_direction * self.rotation_speed * time_passed
@@ -43,10 +41,11 @@ class Player(BasePlayer):
         move_vector = Vector2(dx, dy)
         move_vector *= self.movement_direction *-1  # magic -1 for correct movement
         self.position += move_vector * self.movement_speed * time_passed
+        self.set_hitbox()
 
+    def set_hitbox(self):
         self.rect.x = self.position.x
         self.rect.y = self.position.y
-
 
     def send_message(self, message):
         self.ws_connection.write_message(message.serialize())
@@ -58,11 +57,9 @@ class Player(BasePlayer):
     def handle_hit(self):
         self.position.x = random.randint(30, GameConfig.GAME_WORLD_SIZE_X)
         self.position.y = random.randint(30, GameConfig.GAME_WORLD_SIZE_Y)
+        self.set_hitbox()
         self.direction = random.randint(0, 360)
-        self.rect.x = self.position.x
-        self.rect.y = self.position.y
-        mes = PlayerKilled(self)
-        self.send_message(mes)
+
 
 class Projectile(object):
     rect = None

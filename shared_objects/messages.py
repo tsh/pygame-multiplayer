@@ -71,10 +71,3 @@ class ProjectileMoved(Message):
         self.position = projectile.position
 
 
-class PlayerKilled(Message):
-    def __init__(self, player):
-        self.uuid = player.uuid
-        self.position = (player.position.x, player.position.y)
-        self.direction = player.direction
-
-

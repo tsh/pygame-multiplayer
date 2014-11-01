@@ -34,7 +34,6 @@ class App(object):
             time_elapsed = ioloop.time() - player.time
 
             if player.state == Player.STATE_MOVE:
-                #check collision here if collision(): dx, dy = 0
                 player.calculate_position(time_elapsed)
                 player.time = ioloop.time()
                 mes = PlayerPositionMessage((player.position.x, player.position.y), player.direction)
@@ -62,8 +61,7 @@ class App(object):
             if projectile.is_crossed_boundary():
                 App.Projectiles.remove(projectile)
 
-            if self.check_players_for_hit(projectile):
-                App.Projectiles.remove(projectile)
+            self.check_players_for_hit(projectile)
 
             dt = ioloop.time() - projectile.time
             projectile.update(dt)
@@ -91,6 +89,7 @@ class App(object):
             if bullet.shooter == player:
                 continue
             if bullet.rect.colliderect(player.rect):
+                print player.rect, player.position
                 player.handle_hit()
                 return True
 
