@@ -59,6 +59,8 @@ class Player(BasePlayer):
         self.position.x = random.randint(30, GameConfig.GAME_WORLD_SIZE_X)
         self.position.y = random.randint(30, GameConfig.GAME_WORLD_SIZE_Y)
         self.direction = random.randint(0, 360)
+        self.rect.x = self.position.x
+        self.rect.y = self.position.y
         mes = PlayerKilled(self)
         self.send_message(mes)
 

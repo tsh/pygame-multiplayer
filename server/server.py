@@ -90,7 +90,7 @@ class App(object):
             # no collision with self
             if bullet.shooter == player:
                 continue
-            if player.rect.colliderect(bullet.rect):
+            if bullet.rect.colliderect(player.rect):
                 player.handle_hit()
                 return True
 
