@@ -12,14 +12,19 @@ from tornado import websocket
 from shared_objects.messages import *
 from objects import Player
 
+
 class App(object):
+    Projectiles = []
+
     def __init__(self):
         self.upd_player_callback = tornado.ioloop.PeriodicCallback(self.update_players, 33)
+        self.upd_projectiles_callback = tornado.ioloop.PeriodicCallback(self.update_projectiles, 33)
         self.upd_network_callback = tornado.ioloop.PeriodicCallback(self.update_network, 100)
         self.upd_latency_callback = tornado.ioloop.PeriodicCallback(self.update_latency, 10000)
 
     def run(self):
         self.upd_player_callback.start()
+        self.upd_projectiles_callback.start()
         self.upd_network_callback.start()
         self.upd_latency_callback.start()
 
@@ -37,8 +42,10 @@ class App(object):
                 pmvd = PlayerMoved(player.uuid, (player.position.x, player.position.y), player.direction)
                 self.notify_all_players(pmvd)
             if player.state == Player.STATE_ATTACK:
-                # swing last 1 sec
-                if time_elapsed > 1000:
+                # attack last 1 sec
+                bullet = player.shoot()
+                App.Projectiles.append(bullet)
+                if time_elapsed > 0.3:
                     player.state = Player.STATE_IDLE
                     mes = StateChangeMessage(player.state)
                     player.send_message(mes)
@@ -48,6 +55,17 @@ class App(object):
                     player.state = Player.STATE_HURT
                     #TODO: create change_status message
                     #self.notify_all_players()
+
+
+    def update_projectiles(self):
+        for projectile in App.Projectiles:
+            if projectile.is_crossed_boundary():
+                App.Projectiles.remove(projectile)
+
+            dt = ioloop.time() - projectile.time
+            projectile.update(dt)
+            mes = ProjectileMoved(projectile)
+            self.notify_all_players(mes)
 
 
     def update_network(self):

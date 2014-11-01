@@ -64,3 +64,9 @@ class MyUID(Message):
     def __init__(self, uid):
         self.uuid = uid
 
+
+class ProjectileMoved(Message):
+    def __init__(self, projectile):
+        self.uuid = projectile.uuid
+        self.position = projectile.position
+

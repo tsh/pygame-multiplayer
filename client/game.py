@@ -10,6 +10,25 @@ from shared_objects.messages import *
 from shared_objects.base_player import BasePlayer
 
 
+class Projectile(object):
+    def init_from_message(self, position, uid):
+        self.position = position
+        self.uuid = uid
+
+    @classmethod
+    def init_from_message(cls, message):
+        obj = cls()
+        obj.position = message.position
+        obj.uuid = message.uuid
+        return obj
+
+    def update_from_message(self, message):
+        self.position = message.position
+
+    def render(self, surface):
+        pygame.draw.circle(surface, (255, 0, 0), (int(self.position[0]),int(self.position[1])), 5)
+
+
 class Player(BasePlayer):
     def __init__(self):
         self.name = None
@@ -71,6 +90,13 @@ class WSConnection(WebSocketClient):
                 del Stage.players[message.uuid]
             except KeyError:
                 return
+        if isinstance(message, ProjectileMoved):
+            try:
+                prjc = Stage.projectiles[message.uuid]
+                prjc.update_from_message(message)
+            except KeyError:
+                projectile = Projectile.init_from_message(message)
+                Stage.projectiles[message.uuid] = projectile
         if isinstance(message, StateChangeMessage):
             pass
 
@@ -81,6 +107,7 @@ class WSConnection(WebSocketClient):
 class Stage(object):
     connection = None
     players = {}
+    projectiles = {}
     my_uid = None
 
     @classmethod
@@ -111,6 +138,8 @@ class Game(GameConfig):
 
     def _render(self):
         self._display_surf.fill((1, 2, 2))
+        for projectile in Stage.projectiles.values():
+            projectile.render(self._display_surf)
         for player in Stage.players.values():
             player.render(self._display_surf)
 
