@@ -1,22 +1,22 @@
-import json
-import math
-import time
-import pickle
+import os
 import uuid
 
 import tornado.web
 import tornado.httpserver
 import tornado.ioloop
 from tornado import websocket
+import pygame
 
 from shared_objects.messages import *
-from objects import Player
+from objects import Player, Projectile
 
 
 class App(object):
     Projectiles = []
 
     def __init__(self):
+        Player.player_rect = pygame.image.load(os.path.join("..","shared_objects", "assets", "gun_man.png")).get_rect()
+        Projectile.rect = pygame.image.load(os.path.join("..","shared_objects", "assets", "fireball.png")).get_rect()
         self.upd_player_callback = tornado.ioloop.PeriodicCallback(self.update_players, 33)
         self.upd_projectiles_callback = tornado.ioloop.PeriodicCallback(self.update_projectiles, 33)
         self.upd_network_callback = tornado.ioloop.PeriodicCallback(self.update_network, 100)
@@ -62,6 +62,9 @@ class App(object):
             if projectile.is_crossed_boundary():
                 App.Projectiles.remove(projectile)
 
+            if self.check_players_for_hit(projectile):
+                App.Projectiles.remove(projectile)
+
             dt = ioloop.time() - projectile.time
             projectile.update(dt)
             mes = ProjectileMoved(projectile)
@@ -81,6 +84,15 @@ class App(object):
     def notify_all_players(self, message):
         for player in WSConnectionHandler.players:
             player.send_message(message)
+
+    def check_players_for_hit(self, bullet):
+        for player in WSConnectionHandler.players:
+            # no collision with self
+            if bullet.shooter == player:
+                continue
+            if player.rect.colliderect(bullet.rect):
+                player.handle_hit()
+                return True
 
 class WSConnectionHandler(websocket.WebSocketHandler):
     players = []

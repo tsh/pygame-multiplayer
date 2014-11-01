@@ -11,13 +11,11 @@ from shared_objects.base_player import BasePlayer
 
 
 class Projectile(object):
-    def init_from_message(self, position, uid):
-        self.position = position
-        self.uuid = uid
-
     @classmethod
     def init_from_message(cls, message):
         obj = cls()
+        obj.image = pygame.image.load(os.path.join("..","shared_objects", "assets", "fireball.png")).convert()
+        obj.image.set_colorkey((0, 0, 0))
         obj.position = message.position
         obj.uuid = message.uuid
         return obj
@@ -26,7 +24,7 @@ class Projectile(object):
         self.position = message.position
 
     def render(self, surface):
-        pygame.draw.circle(surface, (255, 0, 0), (int(self.position[0]),int(self.position[1])), 5)
+        surface.blit(self.image, self.position)
 
 
 class Player(BasePlayer):
@@ -97,8 +95,8 @@ class WSConnection(WebSocketClient):
             except KeyError:
                 projectile = Projectile.init_from_message(message)
                 Stage.projectiles[message.uuid] = projectile
-        if isinstance(message, StateChangeMessage):
-            pass
+        if isinstance(message, PlayerKilled):
+            print message
 
     def closed(self, code, reason=None):
         print "CLOSED", code
