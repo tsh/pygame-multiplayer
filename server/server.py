@@ -15,8 +15,12 @@ class App(object):
     Projectiles = []
 
     def __init__(self):
-        Player.player_rect = pygame.image.load(os.path.join("..","shared_objects", "assets", "gun_man.png")).get_rect()
-        Projectile.rect = pygame.image.load(os.path.join("..","shared_objects", "assets", "fireball.png")).get_rect()
+        player_sprite_rect = pygame.image.load(os.path.join("..","shared_objects", "assets", "gun_man.png")).get_rect()
+        Player.HIT_BOX_WIDTH = player_sprite_rect.width
+        Player.HIT_BOX_HEIGHT = player_sprite_rect.height
+        projectile_sprite_rect = pygame.image.load(os.path.join("..","shared_objects", "assets", "fireball.png")).get_rect()
+        Projectile.HIT_BOX_WIDTH = projectile_sprite_rect.width
+        Projectile.HIT_BOX_HEIGHT = projectile_sprite_rect.height
         self.upd_player_callback = tornado.ioloop.PeriodicCallback(self.update_players, 33)
         self.upd_projectiles_callback = tornado.ioloop.PeriodicCallback(self.update_projectiles, 33)
         self.upd_network_callback = tornado.ioloop.PeriodicCallback(self.update_network, 100)
@@ -89,7 +93,6 @@ class App(object):
             if bullet.shooter == player:
                 continue
             if bullet.rect.colliderect(player.rect):
-                print player.rect, player.position
                 player.handle_hit()
                 return True
 

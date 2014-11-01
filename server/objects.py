@@ -3,6 +3,7 @@ import uuid
 import random
 
 import tornado
+import pygame
 
 from shared_objects.base_player import BasePlayer
 from shared_objects.vector2 import Vector2
@@ -12,7 +13,8 @@ ioloop = tornado.ioloop.IOLoop.instance()
 
 
 class Player(BasePlayer):
-    player_rect = None  # hold player rectangle for collision detection
+    HIT_BOX_WIDTH = None
+    HIT_BOX_HEIGHT = None
 
     def __init__(self, ws_connection, uuid):
         self.name = "Test_1"
@@ -30,8 +32,7 @@ class Player(BasePlayer):
         self.movement_direction = 0
         self.rotation_direction = 0
 
-        self.rect = Player.player_rect
-        self.set_hitbox()
+        self.rect = pygame.Rect(self.position.x, self.position.y, Player.HIT_BOX_WIDTH, Player.HIT_BOX_HEIGHT)
 
     def calculate_position(self, time_passed):
         self.direction += self.rotation_direction * self.rotation_speed * time_passed
@@ -40,8 +41,8 @@ class Player(BasePlayer):
         dy = math.cos(self.direction * math.pi / 180)
         move_vector = Vector2(dx, dy)
         move_vector *= self.movement_direction *-1  # magic -1 for correct movement
-        self.position += move_vector * self.movement_speed * time_passed
-        self.set_hitbox()
+        position_vector = move_vector * self.movement_speed * time_passed
+        self.position += position_vector
 
     def set_hitbox(self):
         self.rect.x = self.position.x
@@ -62,7 +63,8 @@ class Player(BasePlayer):
 
 
 class Projectile(object):
-    rect = None
+    HIT_BOX_WIDTH = None
+    HIT_BOX_HEIGHT = None
 
     def __init__(self, position, angle, shooter):
         """
@@ -77,8 +79,7 @@ class Projectile(object):
         self.time = ioloop.time()
         self.uuid = uuid.uuid4()
 
-        self.rect = Projectile.rect
-        self.rect.x, self.rect.y = self.position
+        self.rect = pygame.Rect(self.position[0], self.position[1], Player.HIT_BOX_WIDTH, Player.HIT_BOX_HEIGHT)
 
     def update(self, dt):
         dx = math.sin(self.angle * math.pi / 180) * self.speed * dt
