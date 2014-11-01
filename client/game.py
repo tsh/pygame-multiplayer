@@ -1,14 +1,13 @@
 import sys
 import os
-import pickle
+import random
 
 import pygame
 from ws4py.client.threadedclient import WebSocketClient
 
-from game_config import GameConfig
 from shared_objects.messages import *
 from shared_objects.base_player import BasePlayer
-
+from shared_objects.config import GameConfig
 
 class Projectile(object):
     @classmethod
@@ -59,7 +58,7 @@ class Player(BasePlayer):
 
 class WSConnection(WebSocketClient):
     def opened(self):
-        pi = PlayerSettings(name=GameConfig.player_default_name)
+        pi = PlayerSettings(name=str(random.randint(0,1000)))
         Stage.send_message(pi)
 
     def received_message(self, m):
@@ -123,8 +122,8 @@ class Stage(object):
 class Game(GameConfig):
     def __init__(self, window_caption="this is a game"):
         pygame.init()
-        self._WINDOW_WIDTH = 800
-        self._WINDOW_HEIGHT = 600
+        self._WINDOW_WIDTH = GameConfig.GAME_WORLD_SIZE_X
+        self._WINDOW_HEIGHT = GameConfig.GAME_WORLD_SIZE_Y
         self._FPS = 60  # TODO: sync with server update rate
         self._display_surf = pygame.display.set_mode((self._WINDOW_WIDTH, self._WINDOW_HEIGHT), pygame.HWSURFACE)
         pygame.display.set_caption(window_caption)

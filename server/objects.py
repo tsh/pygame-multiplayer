@@ -1,11 +1,12 @@
 import math
 import uuid
+import random
 
 import tornado
 
 from shared_objects.base_player import BasePlayer
 from shared_objects.vector2 import Vector2
-from server_config import GameConfig
+from shared_objects.config import GameConfig
 from shared_objects.messages import PlayerKilled
 
 ioloop = tornado.ioloop.IOLoop.instance()
@@ -55,6 +56,9 @@ class Player(BasePlayer):
         return bullet
 
     def handle_hit(self):
+        self.position.x = random.randint(30, GameConfig.GAME_WORLD_SIZE_X)
+        self.position.y = random.randint(30, GameConfig.GAME_WORLD_SIZE_Y)
+        self.direction = random.randint(0, 360)
         mes = PlayerKilled(self)
         self.send_message(mes)
 
@@ -86,8 +90,8 @@ class Projectile(object):
     def is_crossed_boundary(self):
         """ Check if bullet is outside game world
         """
-        if self.position[0] > GameConfig.GAME_WORLD_SIZE[0] or self.position[0] < 0 or \
-           self.position[1] > GameConfig.GAME_WORLD_SIZE[1] or self.position[1] < 0:
+        if self.position[0] > GameConfig.GAME_WORLD_SIZE_X or self.position[0] < 0 or \
+           self.position[1] > GameConfig.GAME_WORLD_SIZE_Y or self.position[1] < 0:
             return True
         else:
             return False
